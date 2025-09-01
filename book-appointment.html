@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Appointments</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="darkmode.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb, #05cdff, #08daff);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .symbol {
+      position: absolute;
+      font-size: 28px;
+      opacity: 0.4;
+      animation: float 15s linear infinite;
+    }
+
+    @keyframes float {
+      from { transform: translateY(100vh) rotate(0deg); }
+      to { transform: translateY(-10vh) rotate(360deg); }
+    }
+    .site-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+    .container {
+      position: relative;
+      z-index: 10;
+      max-width: 600px;
+      width: 100%;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    .appointment {
+      color: #000000;
+      background: #f4f6fc;
+      padding: 15px;
+      border-radius: 10px;
+      margin: 10px 0;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .appointment-details {
+      max-width: 80%;
+    }
+
+    .cancel-btn {
+      background: #4bd5ff;
+      border: none;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .cancel-btn:hover {
+      background: #82c7ff;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: #2575fc;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #1a5edb;
+    }
+  </style>
+</head>
+<body>
+  
+<script src="darkmode.js"></script>
+  <div class="container">
+    <h2>📌 My Appointments</h2>
+    <div id="appointmentsList"></div>
+    <button class="btn" onclick="downloadPDF()">📄 Download as PDF</button>
+    <br>
+    <a href="appointment.html" class="btn">➕ Book Another</a>
+    <a href="index.html" class="btn">🔙 Back to Home</a>
+  </div>
+
+  <script>
+    function loadAppointments() {
+      let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      const list = document.getElementById("appointmentsList");
+      list.innerHTML = "";
+
+      if (appointments.length === 0) {
+        list.innerHTML = "<p>No appointments booked yet.</p>";
+        return;
+      }
+
+      appointments.forEach((appt, index) => {
+        const div = document.createElement("div");
+        div.className = "appointment";
+
+        div.innerHTML = `
+          <div class="appointment-details">
+            <strong>Date:</strong> ${appt.date} <br>
+            <strong>Time:</strong> ${appt.slot} <br>
+            <strong>Notes:</strong> ${appt.info || "N/A"}
+          </div>
+          <button class="cancel-btn" onclick="cancelAppointment(${index})">❌ Cancel</button>
+        `;
+
+        list.appendChild(div);
+      });
+    }
+
+    function cancelAppointment(index) {
+      let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      appointments.splice(index, 1);
+      localStorage.setItem("appointments", JSON.stringify(appointments));
+      loadAppointments();
+    }
+
+    async function downloadPDF() {
+      let appointments = JSON.parse(localStorage.getItem("appointments")) || [];
+      if (appointments.length === 0) {
+        alert("No appointments to download.");
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      doc.setFontSize(16);
+      doc.text("📌 My Appointments", 20, 20);
+      doc.setFontSize(12);
+
+      appointments.forEach((appt, i) => {
+        let y = 40 + (i * 30);
+        doc.text(`Date: ${appt.date}`, 20, y);
+        doc.text(`Time: ${appt.slot}`, 20, y + 10);
+        doc.text(`Notes: ${appt.info || "N/A"}`, 20, y + 20);
+      });
+
+      doc.save("appointments.pdf");
+    }
+
+    loadAppointments();
+  </script>
+</body>
+</html>

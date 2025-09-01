@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expert Chat</title>
+    <link rel="stylesheet" href="darkmode.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #3b82f6, #2563eb); /* Blue shades */
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 20px;
+      color: white;
+    }
+    header a {
+      text-decoration: none;
+      background: rgba(255,255,255,0.1);
+      padding: 6px 12px;
+      border-radius: 16px;
+      color: white;
+      font-size: 14px;
+    }
+    .site-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+    .hero {
+      padding: 20px;
+      text-align: center;
+      color: white;
+    }
+    .hero p {
+      margin: 6px 0;
+    }
+    .chat-container {
+      background: white;
+      flex: 1;
+      margin: 0 20px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      background: #f8f9fa;
+    }
+    .bubble {
+      max-width: 70%;
+      padding: 10px 14px;
+      margin: 6px 0;
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .expert {
+      background: #fff;
+      color: #111;
+      border: 1px solid #ddd;
+      align-self: flex-start;
+    }
+    .anon {
+      background: #2563eb;
+      color: #fff;
+      align-self: flex-end;
+    }
+    .composer {
+      display: flex;
+      border-top: 1px solid #ddd;
+      padding: 10px;
+      background: white;
+    }
+    .composer textarea {
+      flex: 1;
+      resize: none;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      padding: 8px;
+      font-size: 14px;
+    }
+    .composer button {
+      margin-left: 8px;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    footer {
+      text-align: center;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <script src="darkmode.js"></script>
+  <header>
+    <a href="start-chat.html">← Back</a>
+    <h2>Expert Chat</h2>
+  </header>
+
+  <div class="hero">
+    <h3>Ready to Feel Heard Without Fear?</h3>
+    <p>This is an anonymous space. You don’t have to face your struggles alone.</p>
+  </div>
+
+  <div class="chat-container">
+    <div class="messages" id="messages">
+      <div class="bubble expert">Hi, I'm your expert. How can I help?</div>
+      <div class="bubble anon">I feel overwhelmed lately...</div>
+    </div>
+    <div class="composer">
+      <textarea id="input" placeholder="Type here..." rows="2"></textarea>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <footer>
+    © 2025 SilentSea • Not a crisis service. If in danger, call local emergency services.
+  </footer>
+
+  <script>
+    const messagesDiv = document.getElementById('messages');
+    const input = document.getElementById('input');
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble anon';
+      bubble.innerText = text;
+      messagesDiv.appendChild(bubble);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      input.value = '';
+
+      // Demo: auto expert reply
+      setTimeout(() => {
+        const reply = document.createElement('div');
+        reply.className = 'bubble expert';
+        reply.innerText = "Thank you for sharing that. Tell me more.";
+        messagesDiv.appendChild(reply);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }, 800);
+    }
+
+    // Press Enter to send
+    input.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+  
+</body>
+</html>

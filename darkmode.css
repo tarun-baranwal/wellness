@@ -1,0 +1,57 @@
+/* Dark Mode Toggle Button */
+.dark-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #2575fc, #6a11cb);
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 12px 16px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+  z-index: 1100;
+}
+.dark-toggle:hover {
+  transform: scale(1.1);
+  background: linear-gradient(135deg, #6a11cb, #2575fc);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background: #121212;
+  color: #f5f5f5;
+}
+body.dark-mode header {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+body.dark-mode .chatbox {
+  background: #1e1e1e;
+  color: #f5f5f5;
+}
+body.dark-mode .msg.bot {
+  background: #2c2c2c;
+  color: #f5f5f5;
+}
+body.dark-mode .msg.user {
+  background: #2575fc;
+  color: #fff;
+}
+body.dark-mode .feature,
+body.dark-mode .testimonial,
+body.dark-mode .faq-item {
+  background: #1e1e1e;
+  color: #f5f5f5;
+  box-shadow: 0 4px 12px rgba(255,255,255,0.05);
+}
+body.dark-mode .footer {
+  background: #111;
+  color: #ffffff;
+}
+body.dark-mode .btn {
+  background: #333;
+  color: #fff;
+  border: 1px solid #666;
+}
