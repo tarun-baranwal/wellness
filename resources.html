@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Student Wellness Resources</title> 
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="darkmode.css">
+  <style>
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    .gradient-bg {
+      background: linear-gradient(-45deg, #0ad0f3, #74a5ff, #2575fc, #36c8db);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+    
+    .card-hover-effect {
+      transition: all 0.3s ease;
+    }
+    
+    .card-hover-effect:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen overflow-x-hidden overflow-y-auto relative">
+<script src="darkmode.js"></script>
+  <!-- Main content -->
+  <div class="container mx-auto px-4 py-8 relative z-10">
+    <div class="max-w-2xl mx-auto">
+      <!-- Header -->
+      <div class="text-center mb-10">
+        <h1 class="text-4xl font-bold text-white mb-2">Student Wellness Resources</h1>
+        <p class="text-xl text-white opacity-80">Tools to support your mental health and academic journey</p>
+      </div>
+      
+      <!-- Resource cards grid -->
+      <div class="grid md:grid-cols-2 gap-6 mb-10">
+        <!-- Relaxation Audio Card -->
+        <div 
+          class="bg-white rounded-xl shadow-lg overflow-hidden card-hover-effect cursor-pointer transition-all duration-300 hover:bg-blue-50"
+          onclick="location.href='relaxtation.html'"
+        >
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-blue-100 p-3 rounded-full mr-4">
+                <i class="fas fa-music text-blue-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-blue-800">Relaxation Tips</h3>
+            </div>
+            <p class="text-gray-600 mb-4">Listen to calming sounds to ease your mind during stressful study sessions.</p>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-blue-500 font-medium">5+ audio tracks</span>
+              <i class="fas fa-chevron-right text-blue-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Meditation Card -->
+        <div 
+          class="bg-white rounded-xl shadow-lg overflow-hidden card-hover-effect cursor-pointer transition-all duration-300 hover:bg-purple-50"
+          onclick="location.href='meditation.html'"
+        >
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-purple-100 p-3 rounded-full mr-4">
+                <i class="fas fa-spa text-purple-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-purple-800">Guided Meditation</h3>
+            </div>
+            <p class="text-gray-600 mb-4">Explore short meditation videos designed for students dealing with overthinking and exam stress.</p>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-purple-500 font-medium">10+ sessions</span>
+              <i class="fas fa-chevron-right text-purple-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Wellness Articles Card -->
+        <div 
+          class="bg-white rounded-xl shadow-lg overflow-hidden card-hover-effect cursor-pointer transition-all duration-300 hover:bg-green-50"
+          onclick="location.href='arcticles.html'"
+        >
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-green-100 p-3 rounded-full mr-4">
+                <i class="fas fa-book-open text-green-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-green-800">Wellness Articles</h3>
+            </div>
+            <p class="text-gray-600 mb-4">Understand why students face anxiety, overthinking, and ways to overcome them.</p>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-green-500 font-medium">15+ articles</span>
+              <i class="fas fa-chevron-right text-green-400"></i>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Study Tips Card -->
+        <div 
+          class="bg-white rounded-xl shadow-lg overflow-hidden card-hover-effect cursor-pointer transition-all duration-300 hover:bg-yellow-50"
+          onclick="location.href='study-tips.html'"
+        >
+          <div class="p-6">
+            <div class="flex items-center mb-4">
+              <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                <i class="fas fa-lightbulb text-yellow-600 text-xl"></i>
+              </div>
+              <h3 class="text-xl font-semibold text-yellow-800">Study Strategies</h3>
+            </div>
+            <p class="text-gray-600 mb-4">Learn effective study techniques to maximize productivity while maintaining balance.</p>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-yellow-500 font-medium">8+ methods</span>
+              <i class="fas fa-chevron-right text-yellow-400"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+        <button 
+          onclick="location.href='chat.html'"
+          class="flex items-center justify-center px-6 py-3 bg-white text-blue-600 font-medium rounded-lg shadow hover:bg-gray-50 transition-colors"
+        >
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Chat
+        </button>
+        <button 
+          onclick="location.href='appointment.html'"
+          class="flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow hover:bg-blue-700 transition-colors"
+        >
+          <i class="fas fa-calendar-alt mr-2"></i>
+          Book Appointment
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="bg-white bg-opacity-20 backdrop-blur-sm py-4 mt-10">
+    <div class="container mx-auto px-4 text-center text-white">
+    
+    <p>© 2025 SilentSea. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p> 
+    <p>This is not a crisis service. If you are in immediate danger, please contact local emergency services.</p> 
+
+ 
+      <div class="flex justify-center space-x-4 mt-2">
+        <a href="#" class="hover:text-blue-200 transition-colors"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" class="hover:text-blue-200 transition-colors"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="hover:text-blue-200 transition-colors"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+  <script src="https://cdn.jotfor.ms/agent/embedjs/0198fb1bd75f7f649f1a00d67bddc094d49d/embed.js"></script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MindCare — Enhanced (Profile, Dashboard, Notifications)</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+<!-- Back to Home Button -->
+<button class="back-btn" onclick="goHome()">⬅ Home</button>
+
+<script>
+  function goHome() {
+    window.location.href = "index.html"; 
+    // change "index.html" to your homepage file
+  }
+</script>
+
+  <script src="darkmode.js"></script>
+<header>
+  <h1>
+    <svg class="logo-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <path d="M12 2C8.5 2 6 4.5 6 8c0 5 6 11 6 11s6-6 6-11c0-3.5-2.5-6-6-6z" fill="#2563eb"/>
+      <circle cx="12" cy="8" r="2.2" fill="#fff"/>
+    </svg>
+    MindCare
+  </h1>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button onclick="toggleTheme()" title="Toggle theme">Theme</button>
+
+    <button onclick="newAffirmation()" title="New affirmation" style="background:linear-gradient(90deg,#06b6d4,#3b82f6)">Affirm</button>
+    <button onclick="openDashboard()" title="Open dashboard" class="secondary">Dashboard</button>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="grid">
+    <!-- main col -->
+    <div>
+      <div class="card" id="affirmationBox" style="display:flex;justify-content:space-between;align-items:center">
+        <div id="affirmationText" style="font-weight:800">Loading affirmation…</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button onclick="newAffirmation()" title="New affirmation">New</button>
+        </div>
+      </div>
+
+      <!-- moods -->
+      <div class="card" style="margin-top:14px">
+        <h2 style="margin:6px 0">How are you feeling today?</h2>
+        <div class="mood-grid" id="moodGrid"></div>
+      </div>
+
+      <!-- quiz -->
+      <div class="card" id="quizArea">
+        <h3 id="quizTitle">Quick check</h3>
+        <div id="quizQuestions"></div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button onclick="submitQuiz()">Submit</button>
+          <button class="secondary" onclick="skipQuiz()">Skip & Advice</button>
+        </div>
+      </div>
+
+      <!-- result -->
+      <div class="card" id="resultArea">
+        <h3>Personalized Advice</h3>
+        <div id="feelingText" style="font-weight:800;margin-top:8px"></div>
+        <div id="whyText" class="muted" style="margin-top:8px"></div>
+        <div id="adviceText" style="margin-top:10px"></div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button onclick="openGame()">Play suggested game</button>
+          <button class="secondary" onclick="doneAdvice()">Done</button>
+        </div>
+      </div>
+
+      <!-- chatbot -->
+      <div class="card" style="margin-top:14px">
+        <h3>Chat (offline helper)</h3>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <textarea id="chatInput" rows="3" placeholder="Ask e.g. 'I'm stressed — quick tips?'"></textarea>
+          <div style="display:flex;gap:8px">
+            <button onclick="sendChat()">Ask</button>
+            <button class="secondary" onclick="clearChat()">Clear</button>
+            <button class="secondary" onclick="requestNotifyPerm()">Enable Notifications</button>
+          </div>
+          <div id="chatOutput" class="muted" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- right col -->
+    <div>
+      <div class="card">
+        <h3>Progress</h3>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px">
+          <div class="stat"><div class="small muted">Points</div><div id="points" style="font-size:1.6rem;font-weight:900">0</div></div>
+          <div class="stat"><div class="small muted">Streak</div><div id="streak" style="font-size:1.05rem">0 days</div></div>
+          <div class="stat"><div class="small muted">Badges</div><div class="badges" id="badges"></div></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px">
+        <h3>Streak Calendar <span class="small muted">(current month)</span></h3>
+        <div id="calendar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- dashboard modal -->
+<div id="dashModal" class="modal" onclick="if(event.target===this) closeDashboard()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <strong>Dashboard</strong>
+        <div class="muted" style="font-size:0.9rem">Your recent activity & stats</div>
+      </div>
+      <div><button style="background:#ef4444" onclick="closeDashboard()">Close</button></div>
+    </div>
+    <div class="dashboard">
+      <div class="card">
+        <h4>Weekly points</h4>
+        <div id="weekBars" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+      </div>
+      <div class="card">
+        <h4>Quick insights</h4>
+        <div style="margin-top:8px">
+          <div class="small muted">Total points</div>
+          <div style="font-weight:900;font-size:1.6rem" id="dashPoints">0</div>
+          <div style="margin-top:12px"><div class="small muted">Current streak</div><div id="dashStreak">0 days</div></div>
+          <div style="margin-top:12px"><div class="small muted">Check-ins this month</div><div id="dashCheckins">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- games modal (re-used) -->
+<div id="modal" class="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <strong id="gameTitle">Game</strong>
+        <div id="gameDesc" class="muted" style="font-size:0.9rem"></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div id="timer" class="muted small"></div>
+        <button style="background:#ef4444" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+
+    <div class="gameArea" id="gameArea">
+      <!-- breathing -->
+      <div id="breathGame" style="display:none">
+        <div class="breathWrap"><div class="circle" id="breathCircle">Breathe</div></div>
+        <div style="text-align:center;margin-top:10px"><button onclick="startBreathing()">Start 60s</button></div>
+      </div>
+
+      <!-- memory -->
+      <div id="memoryGame" style="display:none">
+        <div class="mutedSmall">Flip & match pairs</div>
+        <div class="cards" id="memoryCards"></div>
+        <div style="margin-top:8px"><button onclick="setupMemory()">Reset</button></div>
+      </div>
+
+      <!-- tap -->
+      <div id="tapGame" style="display:none">
+        <div class="mutedSmall">Tap moving targets fast (20s)</div>
+        <div class="shapes" id="shapesArea"></div>
+        <div style="margin-top:8px"><button onclick="startTap()">Start 20s</button></div>
+      </div>
+
+      <!-- puzzle -->
+      <div id="puzzleGame" style="display:none">
+        <div class="mutedSmall">Solve the 3×3 sliding puzzle</div>
+        <div class="puzzleGrid" id="puzzleGrid" style="margin-top:10px"></div>
+        <div style="margin-top:8px"><button onclick="shufflePuzzle()">Shuffle</button></div>
+      </div>
+
+      <!-- zen -->
+      <div id="zenGame" style="display:none">
+        <div class="mutedSmall">Click calmly — every 5 clicks gives a small bonus</div>
+        <div class="zen" style="margin-top:10px">
+          <div id="zenBox" class="color-box" style="background:#60a5fa">Calm</div>
+          <div>
+            <div>Clicks: <span id="zenClicks">0</span></div>
+            <div style="margin-top:8px"><button onclick="zenClick()">Click</button></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- toasts -->
+<div id="toast"></div>
+    <script>
+  // Affirm Feature
+  const affirmations = [
+    "You are stronger than you think 🌟",
+    "Every day is a fresh start 🌼",
+    "Keep going, you're doing great 💪",
+    "Your feelings are valid 💖",
+    "Breathe. You've got this 🌿"
+  ];
+
+  document.getElementById("affirmBtn").addEventListener("click", () => {
+    const randomIndex = Math.floor(Math.random() * affirmations.length);
+    document.getElementById("affirmText").innerText = affirmations[randomIndex];
+  });
+
+  // New Feeling Feature
+  document.getElementById("newBtn").addEventListener("click", () => {
+    let newFeeling = prompt("Enter your new feeling:");
+    if(newFeeling) {
+      let btn = document.createElement("button");
+      btn.className = "feeling";
+      btn.textContent = newFeeling;
+      document.getElementById("feelings").appendChild(btn);
+    }});
+</script>
+<script src="script.js"></script>
+</body>
+</html>

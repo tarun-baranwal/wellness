@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SilentSea - Anonymous Counseling</title>
+  <style>
+    /* RESET */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2575fc, #6a11cb);
+      color: white;
+      padding: 50px 20px;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+    }
+
+    header p {
+      max-width: 600px;
+      margin: 0 auto 20px 0;
+      font-size: 1.1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      margin: 10px 10px 0 0;
+      padding: 14px 28px;
+      font-weight: bold;
+      text-decoration: none;
+      color: #2575fc;
+      background: white;
+      border-radius: 30px;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #f1f1f1;
+    }
+
+    /* Chatbox mockup */
+    .chatbox {
+      background: white;
+      color: #333;
+      border-radius: 15px;
+      padding: 15px;
+      width: 320px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      justify-content: space-between;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .msg {
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 12px;
+      max-width: 75%;
+      word-wrap: break-word;
+    }
+
+    .msg.user {
+      background: #2575fc;
+      color: white;
+      margin-left: auto;
+    }
+
+    .msg.bot {
+      background: #f1f1f1;
+      color: #333;
+      margin-right: auto;
+    }
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      background: #f9f9f9;
+    }
+
+    .chat-input button {
+      margin-left: 8px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 8px;
+      background: #2575fc;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .section {
+      padding: 60px 20px;
+      text-align: center;
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+    }
+
+    .features {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .feature {
+      flex: 1;
+      min-width: 250px;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .testimonials {
+      max-width: 800px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .testimonial {
+      background: #f4f6ff;
+      padding: 20px;
+      border-radius: 12px;
+      font-style: italic;
+    }
+
+    .faq {
+      max-width: 700px;
+      margin: auto;
+      text-align: left;
+    }
+
+    .faq-item {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .cta {
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      padding: 50px 20px;
+      text-align: center;
+    }
+
+    .cta h2 {
+      margin-bottom: 20px;
+    }
+
+    .footer {
+      background: #222;
+      color: #bbb;
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: #ddd;
+      text-decoration: none;
+    }
+
+    /* Feedback Button (bottom-left) */
+    .feedback-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;  /* moved to left */
+      background: #2575fc;
+      color: white;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: 0.3s;
+      z-index: 1000;
+    }
+    .feedback-btn:hover {
+      background: #6a11cb;
+    }
+
+    /* Feedback Popup (bottom-left) */
+    .feedback-popup {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      left: 20px;  /* moved to left */
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      width: 300px;
+      z-index: 1001;
+    }
+    .feedback-popup h3 {
+      margin-bottom: 10px;
+    }
+    .feedback-popup textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      resize: none;
+      margin-bottom: 10px;
+    }
+    .feedback-popup button {
+      background: #2575fc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .feedback-popup button:hover {
+      background: #6a11cb;
+    }
+
+    @media (max-width: 900px) {
+      header {
+        flex-direction: column;
+        text-align: center;
+      }
+      .chatbox {
+        margin-top: 20px;
+      }
+    }
+
+
+  .game-btn {
+    position: fixed;
+    bottom: 80px;   /* placed above feedback button */
+    left: 20px;
+    background: linear-gradient(135deg, #ff512f, #dd2476);
+    color: white;
+    border: none;
+    padding: 14px 26px;
+    border-radius: 40px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .game-btn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(221, 36, 118, 0.6);
+    background: linear-gradient(135deg, #dd2476, #ff512f);
+  }
+  </style>
+  <link rel="stylesheet" href="darkmode.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="hero-text">
+      <h1>Anonymous Counseling Without Judgment</h1>
+      <p>Share your struggles with anxiety, depression, or life challenges completely anonymously. 
+         Get real solutions from professional counselors who truly listen.</p>
+      <a href="#chat" class="btn">Start Chatting Now</a>
+      <a href="#how" class="btn" style="background:transparent; border:2px solid white; color:white;">How It Works</a>
+    </div>
+
+    <!-- Chatbox mockup -->
+    <div class="chatbox">
+      <div class="chat-messages">
+        <div class="msg bot">👋 Hi, I’m here to listen. How are you feeling today?</div>
+        <div class="msg user">Honestly, I’ve been feeling really anxious.</div>
+        <div class="msg bot">That’s okay. Want to talk about what’s been on your mind?</div>
+      </div>
+      <div class="chat-input">
+        <input type="text" placeholder="Type a message..." disabled>
+        <button disabled>Send</button>
+      </div>
+    </div>
+  </header>
+  <!-- Dark Mode Toggle (only on main page) -->
+<button class="dark-toggle" onclick="toggleDarkMode()">🌙</button>
+
+<script src="darkmode.js"></script>
+  <!-- WHY SAFEHAVEN -->
+  <section class="section" id="why">
+    <h2>Why SilentSea ??</h2>
+    <div class="features">
+      <div class="feature">
+        <h3>🔒 Complete Anonymity</h3>
+        <p>No personal details required. Your identity stays protected while you get the help you need.</p>
+      </div>
+      <div class="feature">
+        <h3>🎧 24/7 Counselor Access</h3>
+        <p>Connect with licensed professionals whenever you need, day or night. No appointments required.</p>
+      </div>
+      <div class="feature">
+        <h3>💙 Solution-Focused</h3>
+        <p>Get practical strategies tailored to your situation, not just generic advice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <h2>How It Works</h2>
+    <div class="features">
+      <div class="feature"><h3>1. Start Anonymously</h3><p>No sign-up. Just create a random username and start chatting.</p></div>
+      <div class="feature"><h3>2. Connect with a Counselor</h3><p>Get matched with a professional who understands your challenges.</p></div>
+      <div class="feature"><h3>3. Get Practical Help</h3><p>Your counselor will listen and provide actionable strategies.</p></div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section" id="testimonials">
+    <h2>What People Are Saying</h2>
+    <div class="testimonials">
+      <div class="testimonial">
+        <p>"I was terrified to talk about my career anxiety with anyone. SilentSea gave me a space to be honest without fear."</p>
+        <small>- Anonymous User, 28</small>
+      </div>
+      <div class="testimonial">
+        <p>"After a breakup, I felt so alone. The counselor here didn’t just listen—they gave me steps to rebuild confidence."</p>
+        <small>- Anonymous User, 24</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <div class="faq">
+      <div class="faq-item"><strong>Is this really anonymous?</strong><br>No personal info is required, your privacy is protected.</div>
+      <div class="faq-item"><strong>How are the counselors qualified?</strong><br>All are licensed professionals with training in mental health.</div>
+      <div class="faq-item"><strong>What if I need more help?</strong><br>You can continue sessions as long as you need.</div>
+      <div class="faq-item"><strong>Is there a cost?</strong><br>Basic support is free. Additional services may be optional.</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta" id="chat">
+    <h2>Ready to Feel Heard Without Fear?</h2>
+    <p>Take the first step toward relief. You don’t have to face your struggles alone.</p>
+    <a href="start-chat.html" class="btn">Start Anonymous Chat Now</a>
+  </section>
+
+  <!-- <a href="#" class="btn" onclick="openJotformChat()">Start Anonymous Chat Now</a> -->
+  <script>
+    function openJotformChat() {
+      const event = new CustomEvent("jotform-agent-open");
+      window.dispatchEvent(event);
+    }
+  </script>
+  <script src="https://cdn.jotfor.ms/agent/embedjs/0198fb1bd75f7f649f1a00d67bddc094d49d/embed.js"></script>
+      <!-- Game Button -->
+<button class="game-btn" onclick="openGame()">🎮 Game</button>
+
+<script>
+  function openGame() {
+    window.location.href = "game.html"; 
+    // Change "game.html" to your actual game page filename
+  }
+</script>
+
+  <!-- Feedback Button -->
+  <button class="feedback-btn" onclick="toggleFeedback()">Feedback</button>
+
+  <!-- Feedback Popup -->
+  <div class="feedback-popup" id="feedbackForm">
+    <h3>Your Feedback</h3>
+    <textarea placeholder="Share your thoughts..."></textarea>
+    <button onclick="submitFeedback()">Submit</button>
+  </div>
+
+  <script>
+    function toggleFeedback() {
+      const form = document.getElementById("feedbackForm");
+      form.style.display = form.style.display === "block" ? "none" : "block";
+    }
+    function submitFeedback() {
+      const feedback = document.querySelector("#feedbackForm textarea").value;
+      if(feedback.trim() === "") {
+        alert("Please enter your feedback before submitting.");
+        return;
+      }
+      alert("Thank you for your feedback!");
+      document.querySelector("#feedbackForm textarea").value = "";
+      document.getElementById("feedbackForm").style.display = "none";
+    }
+  </script>
+
+  <!-- FOOTER --> 
+  <footer class="footer"> 
+    <p>© 2025 SilentSea. All rights reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p> 
+    <p>This is not a crisis service. If you are in immediate danger, please contact local emergency services.</p> 
+  </footer> 
+ 
+</body> 
+</html>
