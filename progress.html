@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Habit Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:14px;background:#7299e5;color:#14213d}
+    .wrap{max-width:1000px;margin:0 auto}
+    h1{color:#0b6fa8;text-align:center}
+    .card{background:#fff;padding:14px;border-radius:12px;box-shadow:0 8px 20px rgba(12,24,40,.06);margin-bottom:14px}
+    .days {display:grid;grid-template-columns:180px repeat(7,1fr);gap:8px;align-items:center;margin-bottom:8px;color:#0b6fa8;font-weight:700}
+    .activity{display:grid;grid-template-columns:180px repeat(7,1fr);gap:8px;align-items:center;margin:6px 0}
+    label{font-weight:600}
+    input[type="checkbox"]{width:20px;height:20px;cursor:pointer}
+    .controls{display:flex;gap: 50px;margin-top:50px}
+    .controls input{flex:1;padding:8px;border-radius:8px;border:1px solid #d6dbe6}
+    .controls button{padding:8px 12px;border-radius:8px;border:none;background:#0b6fa8;color:#fff;cursor:pointer}
+    canvas{width:100%;height:260px;border-radius:8px;background:#fff;border:1px solid #eef3fb}
+    .muted{color:#6b7280;font-size:13px}
+    .small{font-size:13px}
+  </style>
+</head>
+<body>
+    
+  <div class="wrap">
+      <button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+    <h1 >Habit Tracker</h1>
+
+    <div class="card">
+      <div class="days">
+        <div>Habit</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div>
+      </div>
+
+      <div id="activityList"></div>
+
+      <div class="controls">
+        <input id="newActivity" placeholder="Add new habit (e.g., Meditation)"/>
+        <button id="addBtn">Add</button>
+        <button id="simulatePush" title="simulate incoming push">Simulate Push</button>
+      </div>
+      <div class="muted small" style="margin-top:8px">
+        Notifications scheduled at <strong>20:00 (8 PM)</strong> local time. Local scheduling works while this page/tab is open.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Weekly Summary Graph</h3>
+      <canvas id="barChart" width="900" height="260" aria-label="Weekly habit vs reminders chart"></canvas>
+      <div class="muted small" style="margin-top:8px">Left bar = completions per day. Right bar = reminders sent that day.</div>
+    </div>
+  </div>
+
+<script>
+/* ========= Data model =========
+state = {
+  activities: [{name, days:[bool x7]}],
+  reminders: { 'YYYY-MM-DD': count }, // how many reminders sent that date
+}
+All stored in localStorage under KEY
+*/
+function goBack(){
+  window.location.href = "game.html";
+}
+const KEY = 'ss_habit_plus_reminders_v1';
+const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+function todayISO(d=new Date()){
+  const y=d.getFullYear(), m=(d.getMonth()+1).toString().padStart(2,'0'), day=d.getDate().toString().padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function isoOfDateOffset(offset){ // offset days from today (-6 .. 0 .. +6)
+  const d=new Date();
+  d.setDate(d.getDate()+offset);
+  return d.toISOString().slice(0,10);
+}
+
+function defaultState(){ return { activities: [], reminders: {} }; }
+function load(){ try { return JSON.parse(localStorage.getItem(KEY)) || defaultState(); } catch { return defaultState(); } }
+function save(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+
+let state = load();
+
+/* ======== UI ======== */
+const activityList = document.getElementById('activityList');
+const addBtn = document.getElementById('addBtn');
+const newActivity = document.getElementById('newActivity');
+const chartCanvas = document.getElementById('barChart');
+const simulatePushBtn = document.getElementById('simulatePush');
+
+function renderActivities(){
+  activityList.innerHTML = '';
+  state.activities.forEach((act, ai) => {
+    const row = document.createElement('div'); row.className='activity';
+    let html = `<div><label>${escapeHtml(act.name)}</label></div>`;
+    act.days.forEach((val, di) => {
+      html += `<div style="text-align:center"><input type="checkbox" data-ai="${ai}" data-di="${di}" ${val ? 'checked' : ''}></div>`;
+    });
+    row.innerHTML = html;
+    activityList.appendChild(row);
+  });
+
+  // attach handlers
+  activityList.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', (e)=>{
+      const ai = parseInt(cb.dataset.ai), di = parseInt(cb.dataset.di);
+      state.activities[ai].days[di] = cb.checked;
+      save(state);
+      drawChart();
+    });
+  });
+}
+function escapeHtml(s){ return s.replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+addBtn.onclick = ()=> {
+  const name = newActivity.value.trim(); if(!name) return;
+  state.activities.push({ name, days: Array(7).fill(false) });
+  newActivity.value=''; save(state); renderActivities(); drawChart();
+};
+
+/* ======== Reminders management ======== */
+function incReminderForDate(iso){
+  state.reminders[iso] = (state.reminders[iso]||0) + 1;
+  save(state);
+}
+
+// Local daily reminder at 20:00 (works while tab open)
+function scheduleLocalReminder(hour=20, minute=0){
+  // compute ms until next target
+  const now = new Date();
+  const target = new Date();
+  target.setHours(hour, minute, 0, 0);
+  if(now > target) target.setDate(target.getDate()+1);
+  const ms = target - now;
+  setTimeout(function fire(){
+    sendLocalReminder();
+    // repeat every 24h
+    setInterval(sendLocalReminder, 24*60*60*1000);
+  }, ms);
+}
+
+function sendLocalReminder(){
+  // which day index today? map Mon=0..Sun=6
+  const dow = new Date().getDay(); // Sun=0..Sat=6
+  const idx = dow === 0 ? 6 : dow - 1;
+  const pending = state.activities.filter(a => !a.days[idx]).map(a=>a.name);
+  const iso = todayISO();
+  incReminderForDate(iso);
+  if(Notification.permission === 'granted' && pending.length){
+    new Notification('⏰ SilentSea Reminder', { body: 'You still need to: ' + pending.join(', '), icon: '' });
+  }
+  drawChart();
+}
+
+/* ======== Chart ======== */
+function drawChart(){
+  const ctx = chartCanvas.getContext('2d');
+  const W = chartCanvas.width = chartCanvas.clientWidth * devicePixelRatio;
+  const H = chartCanvas.height = 260 * devicePixelRatio;
+  ctx.clearRect(0,0,W,H);
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  // compute last 7 days Mon..Sun alignment: we want Monday..Sunday for the current week
+  // We'll display last 7 days ending today (Mon..Sun labels still shown)
+  const labels = [];
+  const completions = []; // number of checked habits that day
+  const reminders = [];
+
+  // Use offsets -6..0 to show last 7 days (older on left)
+  for(let off = -6; off <= 0; off++){
+    const iso = isoOfDateOffset(off);
+    const dayIdx = (()=>{ const d = new Date(); d.setDate(d.getDate()+off); const dow = d.getDay(); return dow === 0 ? 6 : dow - 1; })();
+    labels.push(dayNames[dayIdx]);
+    // completions: sum of activities checked for that dayIdx
+    let c = 0;
+    state.activities.forEach(a => { if(a.days[dayIdx]) c++; });
+    completions.push(c);
+    reminders.push(state.reminders[iso] || 0);
+  }
+
+  // layout
+  const padding = 24;
+  const chartW = chartCanvas.clientWidth - padding*2;
+  const chartH = 180;
+  const maxVal = Math.max(...completions, ...reminders, 1);
+  const barGroupW = chartW / labels.length;
+  const barW = Math.min(24, barGroupW * 0.32);
+
+  // draw grid lines
+  ctx.strokeStyle = '#e6eef8';
+  ctx.lineWidth = 1;
+  for(let i=0;i<=4;i++){
+    const y = padding + i*(chartH/4);
+    ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(padding+chartW, y); ctx.stroke();
+  }
+
+  // draw bars
+  for(let i=0;i<labels.length;i++){
+    const gx = padding + i*barGroupW + barGroupW*0.15;
+    const cH = (completions[i] / maxVal) * chartH;
+    const rH = (reminders[i] / maxVal) * chartH;
+
+    // completions (left bar) - bluish
+    ctx.fillStyle = '#0b6fa8';
+    ctx.fillRect(gx, padding + chartH - cH, barW, cH);
+
+    // reminders (right bar) - orange
+    ctx.fillStyle = '#ff9f1c';
+    ctx.fillRect(gx + barW + 6, padding + chartH - rH, barW, rH);
+
+    // labels
+    ctx.fillStyle = '#6b7280';
+    ctx.font = '12px system-ui, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[i], gx + barW, padding + chartH + 18);
+
+    // values above bars
+    ctx.fillStyle = '#14213d';
+    ctx.font = '12px system-ui, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(String(completions[i]), gx + barW/2, padding + chartH - cH - 6);
+    ctx.fillText(String(reminders[i]), gx + barW + 6 + barW/2, padding + chartH - rH - 6);
+  }
+
+  // legend
+  ctx.fillStyle = '#0b6fa8'; ctx.fillRect(padding, padding + chartH + 36, 12, 12);
+  ctx.fillStyle = '#14213d'; ctx.font = '12px system-ui, Arial'; ctx.fillText('Completions', padding + 22, padding + chartH + 46);
+  ctx.fillStyle = '#ff9f1c'; ctx.fillRect(padding + 120, padding + chartH + 36, 12, 12);
+  ctx.fillStyle = '#14213d'; ctx.fillText('Reminders sent', padding + 142, padding + chartH + 46);
+}
+
+/* ======== Permissions & scheduling ======== */
+function askNotifications(){
+  if(Notification.permission !== 'granted') Notification.requestPermission();
+}
+
+/* ======== Simulate incoming push ======== */
+/* Useful for testing FCM: simulate that a background push was received,
+   increment reminder count for today and update chart */
+simulatePushBtn.onclick = ()=>{
+  onPushReceived({ notification: { title:'Test Push', body:'Remote reminder delivered' }});
+};
+
+/* ======== Hook for background push messages ========
+If you use FCM, in your service worker you can postMessage to clients:
+  self.clients.matchAll({includeUncontrolled:true, type:'window'}).then(clients => {
+    clients.forEach(client => client.postMessage({ type:'reminder_sent', iso: '2025-09-03' }));
+  });
+
+On the page, listen for message and update local state.
+*/
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', (ev)=>{
+    const data = ev.data;
+    if(data && data.type === 'reminder_sent'){
+      const iso = data.iso || todayISO();
+      incReminderForDate(iso);
+      drawChart();
+    }
+  });
+}
+
+/* Handler invoked when push arrives while page is open (or simulated) */
+function onPushReceived(payload){
+  // increment today
+  incReminderForDate(todayISO());
+  // optionally show a notification if permission granted
+  if(Notification.permission === 'granted'){
+    const title = (payload.notification && payload.notification.title) || 'SilentSea Reminder';
+    const body = (payload.notification && payload.notification.body) || 'You have habits pending';
+    new Notification(title, { body });
+  }
+  drawChart();
+}
+
+/* ======== Boot ======== */
+renderActivities();
+askNotifications();
+drawChart();
+scheduleLocalReminder(20,0); // 8 PM daily
+
+/* helper: schedule function defined below (reused) */
+function scheduleLocalReminder(hour, minute){
+  const now = new Date();
+  let target = new Date();
+  target.setHours(hour, minute, 0, 0);
+  if(now > target) target.setDate(target.getDate()+1);
+  const ms = target - now;
+  setTimeout(function run(){
+    sendLocalReminderWrapper();
+    setInterval(sendLocalReminderWrapper, 24*60*60*1000);
+  }, ms);
+}
+function sendLocalReminderWrapper(){
+  // call sendLocalReminder above
+  // call the same behavior as onPushReceived but record reminder count
+  // Find today's day index and pending (for notification body)
+  const dow = new Date().getDay(); const idx = dow === 0 ? 6 : dow - 1;
+  const pending = state.activities.filter(a => !a.days[idx]).map(a=>a.name);
+  // increment reminder for today
+  incReminderForDate(todayISO());
+  if(Notification.permission === 'granted' && pending.length){
+    new Notification('⏰ SilentSea Reminder', { body: 'You still need to: ' + pending.join(', ') });
+  }
+  drawChart();
+}
+
+/* ======== Expose onPushReceived globally for service-worker to call when page is focused ======== */
+window.onPushReceived = onPushReceived;
+
+/* ======== Handle page unload: save state ======== */
+window.addEventListener('beforeunload', ()=> save(state));
+</script>
+</body>
+</html>
